@@ -8,6 +8,11 @@ let isProcessing = false;
 const SUPABASE_URL = 'https://ntmupvlfezywrqncifvm.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_YNWMOMvYtKaPMwmNxXlP5w_4SMftiXC';
 const SUPABASE_TABLE_CANDIDATES = ['Sessions', 'sessions'];
+const SUPABASE_FIELD_CANDIDATES = {
+    solicit: ['Solicit', 'solicit'],
+    status: ['Status', 'status'],
+    code: ['Code', 'code']
+};
 
 async function supabaseRequest(path, options = {}) {
     const response = await fetch(`${SUPABASE_URL}${path}`, {
@@ -45,6 +50,66 @@ async function supabaseTableRequest(query = '', options = {}) {
     }
 
     throw lastError || new Error('Não foi possível acessar a tabela do Supabase.');
+}
+
+async function supabaseTableSelect(fieldName, fieldValue) {
+    let lastError = null;
+
+    for (const tableName of SUPABASE_TABLE_CANDIDATES) {
+        for (const candidateField of SUPABASE_FIELD_CANDIDATES[fieldName] || [fieldName]) {
+            try {
+                const query = `?select=*&${candidateField}=eq.${encodeURIComponent(fieldValue)}&order=id.desc&limit=1`;
+                return await supabaseRequest(`/rest/v1/${tableName}${query}`);
+            } catch (error) {
+                const message = String(error.message || error);
+                if (!message.includes('42703') && !message.includes('column') && !message.includes('does not exist')) {
+                    throw error;
+                }
+                lastError = error;
+            }
+        }
+    }
+
+    throw lastError || new Error('Não foi possível consultar o registro no Supabase.');
+}
+
+async function supabaseTableInsert(payload) {
+    let lastError = null;
+
+    for (const tableName of SUPABASE_TABLE_CANDIDATES) {
+        for (const [fieldName, fieldValue] of Object.entries(payload)) {
+            // tentamos primeiro com o nome original em caixa, depois em minúsculas
+        }
+
+        const payloadVariants = [
+            payload,
+            {
+                status: payload.status ?? payload.Status,
+                solicit: payload.solicit ?? payload.Solicit,
+                code: payload.code ?? payload.Code
+            }
+        ].filter((value, index, self) => self.findIndex(item => JSON.stringify(item) === JSON.stringify(value)) === index);
+
+        for (const candidatePayload of payloadVariants) {
+            try {
+                return await supabaseRequest(`/rest/v1/${tableName}`, {
+                    method: 'POST',
+                    headers: {
+                        Prefer: 'return=representation'
+                    },
+                    body: JSON.stringify(candidatePayload)
+                });
+            } catch (error) {
+                const message = String(error.message || error);
+                if (!message.includes('42703') && !message.includes('column') && !message.includes('does not exist')) {
+                    throw error;
+                }
+                lastError = error;
+            }
+        }
+    }
+
+    throw lastError || new Error('Não foi possível gravar no Supabase.');
 }
 
 // Dados das automações
@@ -117,11 +182,9 @@ async function buscarCodigoRelatorio() {
     codigoInput.value = '';
     
     try {
-        const rows = await supabaseTableRequest(
-            '?select=*&solicit=eq.QP_input&order=id.desc&limit=1'
-        );
+        const rows = await supabaseTableSelect('solicit', 'QP_input');
 
-        const codigo = rows && rows.length ? rows[0].code : '000000';
+        const codigo = rows && rows.length ? (rows[0].Code ?? rows[0].code ?? '000000') : '000000';
         codigoInput.value = codigo || '000000';
         criarNotificacao('Código do relatório atualizado com sucesso!', 'success');
     } catch (error) {
@@ -146,11 +209,9 @@ async function buscarCodigoRelatorioInspecao() {
     codigoInput.value = '';
     
     try {
-        const rows = await supabaseTableRequest(
-            '?select=*&solicit=eq.QP_Inspecao&order=id.desc&limit=1'
-        );
+        const rows = await supabaseTableSelect('solicit', 'QP_Inspecao');
 
-        const codigo = rows && rows.length ? rows[0].code : '000000';
+        const codigo = rows && rows.length ? (rows[0].Code ?? rows[0].code ?? '000000') : '000000';
         codigoInput.value = codigo || '000000';
         criarNotificacao('Código QP_Inspecao atualizado com sucesso!', 'success');
     } catch (error) {
@@ -271,16 +332,10 @@ async function confirmarInicializacao() {
         : 'QP_input';
 
     try {
-        await supabaseTableRequest('', {
-            method: 'POST',
-            headers: {
-                Prefer: 'return=representation'
-            },
-            body: JSON.stringify({
-                status: 'Solicitado',
-                solicit,
-                code: codigoRelatorio
-            })
+        await supabaseTableInsert({
+            Status: 'Solicitado',
+            Solicit: solicit,
+            Code: codigoRelatorio
         });
 
         criarNotificacao('Automação registrada no Supabase com sucesso!', 'success');
