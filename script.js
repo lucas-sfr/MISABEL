@@ -4,7 +4,8 @@ let automacaoAtualProcesso = null; // Nova variável para controlar o processo
 let progressInterval = null;
 let isProcessing = false;
 
-const SUPABASE_URL = 'https://ynwmomvytkapmwmnxxlp5w4smftixc.supabase.co';
+// URL do projeto do Supabase (Project Settings > API > Project URL)
+const SUPABASE_URL = 'https://ntmupvlfezywrqncifvm.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_YNWMOMvYtKaPMwmNxXlP5w_4SMftiXC';
 
 async function supabaseRequest(path, options = {}) {
