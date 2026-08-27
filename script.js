@@ -112,6 +112,62 @@ async function supabaseTableInsert(payload) {
     throw lastError || new Error('Não foi possível gravar no Supabase.');
 }
 
+async function supabaseTableUpsertBySolicit(payload) {
+    const solicit = payload.Solicit ?? payload.solicit;
+    if (!solicit) {
+        throw new Error('Solicit é obrigatório para gravar no Supabase.');
+    }
+
+    const statusValue = payload.Status ?? payload.status ?? 'Solicitado';
+    const codeValue = payload.Code ?? payload.code ?? '000000';
+    let lastError = null;
+
+    for (const tableName of SUPABASE_TABLE_CANDIDATES) {
+        for (const candidateField of ['Solicit', 'solicit']) {
+            try {
+                const existingRows = await supabaseRequest(
+                    `/rest/v1/${tableName}?select=*&${candidateField}=eq.${encodeURIComponent(solicit)}&order=id.desc&limit=1`
+                );
+
+                if (!Array.isArray(existingRows) || existingRows.length === 0) {
+                    return await supabaseTableInsert({
+                        ...payload,
+                        Status: statusValue,
+                        Solicit: solicit,
+                        Code: codeValue
+                    });
+                }
+
+                const updatePayload = {
+                    Status: statusValue,
+                    status: statusValue,
+                    Code: codeValue,
+                    code: codeValue
+                };
+
+                return await supabaseRequest(
+                    `/rest/v1/${tableName}?${candidateField}=eq.${encodeURIComponent(solicit)}`,
+                    {
+                        method: 'PATCH',
+                        headers: {
+                            Prefer: 'return=representation'
+                        },
+                        body: JSON.stringify(updatePayload)
+                    }
+                );
+            } catch (error) {
+                const message = String(error.message || error);
+                if (!message.includes('42703') && !message.includes('column') && !message.includes('does not exist')) {
+                    throw error;
+                }
+                lastError = error;
+            }
+        }
+    }
+
+    throw lastError || new Error('Não foi possível garantir o registro no Supabase.');
+}
+
 // Dados das automações
 const automacoes = {
     relatorios: {
@@ -332,7 +388,7 @@ async function confirmarInicializacao() {
         : 'QP_input';
 
     try {
-        await supabaseTableInsert({
+        await supabaseTableUpsertBySolicit({
             Status: 'Solicitado',
             Solicit: solicit,
             Code: codigoRelatorio
