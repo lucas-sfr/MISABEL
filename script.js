@@ -120,7 +120,6 @@ async function supabaseTableUpsertBySolicit(payload) {
 
     const statusValue = payload.Status ?? payload.status ?? 'Solicitado';
     const codeValue = payload.Code ?? payload.code ?? '000000';
-    let lastError = null;
 
     for (const tableName of SUPABASE_TABLE_CANDIDATES) {
         for (const candidateField of ['Solicit', 'solicit']) {
@@ -130,42 +129,40 @@ async function supabaseTableUpsertBySolicit(payload) {
                 );
 
                 if (!Array.isArray(existingRows) || existingRows.length === 0) {
-                    return await supabaseTableInsert({
-                        ...payload,
-                        Status: statusValue,
-                        Solicit: solicit,
-                        Code: codeValue
-                    });
+                    continue;
                 }
 
-                const updatePayload = {
-                    Status: statusValue,
-                    status: statusValue,
-                    Code: codeValue,
-                    code: codeValue
-                };
+                const row = existingRows[0];
+                const rowId = row.id ?? row.Id;
+                const statusField = Object.keys(row).find(key => key.toLowerCase() === 'status') || 'Status';
+                const codeField = Object.keys(row).find(key => key.toLowerCase() === 'code') || 'Code';
+                const patchPath = rowId != null
+                    ? `/rest/v1/${tableName}?id=eq.${encodeURIComponent(String(rowId))}`
+                    : `/rest/v1/${tableName}?${candidateField}=eq.${encodeURIComponent(solicit)}`;
 
-                return await supabaseRequest(
-                    `/rest/v1/${tableName}?${candidateField}=eq.${encodeURIComponent(solicit)}`,
-                    {
-                        method: 'PATCH',
-                        headers: {
-                            Prefer: 'return=representation'
-                        },
-                        body: JSON.stringify(updatePayload)
-                    }
-                );
+                await supabaseRequest(patchPath, {
+                    method: 'PATCH',
+                    headers: {
+                        Prefer: 'return=representation'
+                    },
+                    body: JSON.stringify({
+                        [statusField]: statusValue,
+                        [codeField]: codeValue
+                    })
+                });
+
+                return { tableName, action: 'update' };
             } catch (error) {
                 const message = String(error.message || error);
-                if (!message.includes('42703') && !message.includes('column') && !message.includes('does not exist')) {
-                    throw error;
+                if (message.includes('PGRST205') || message.includes('Could not find the table') || message.includes('42703') || message.includes('column') || message.includes('does not exist')) {
+                    continue;
                 }
-                lastError = error;
+                throw error;
             }
         }
     }
 
-    throw lastError || new Error('Não foi possível garantir o registro no Supabase.');
+    return false;
 }
 
 // Dados das automações
@@ -388,13 +385,17 @@ async function confirmarInicializacao() {
         : 'QP_input';
 
     try {
-        await supabaseTableUpsertBySolicit({
+        const resultado = await supabaseTableUpsertBySolicit({
             Status: 'Solicitado',
             Solicit: solicit,
             Code: codigoRelatorio
         });
 
-        criarNotificacao('Automação registrada no Supabase com sucesso!', 'success');
+        if (!resultado) {
+            throw new Error(`Nenhum registro existente encontrado para ${solicit}. A edição foi ignorada.`);
+        }
+
+        criarNotificacao('Automação atualizada no Supabase com sucesso!', 'success');
     } catch (error) {
         console.error('❌ Erro ao gravar no Supabase:', error);
         criarNotificacao('Erro ao gravar no Supabase: ' + error.message, 'error');
