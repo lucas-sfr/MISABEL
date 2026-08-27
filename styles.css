@@ -1100,8 +1100,25 @@ body {
 }
 
 /* Estilos para campo de código */
+.status-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0.75rem 0 0.25rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(220, 38, 38, 0.12);
+    border: 1px solid rgba(220, 38, 38, 0.45);
+    color: #fca5a5;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    width: fit-content;
+}
+
 .code-container {
-    margin-top: 1rem;
+    margin-top: 0.5rem;
     padding: 1rem;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 12px;

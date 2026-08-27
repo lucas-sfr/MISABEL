@@ -255,6 +255,24 @@ const automacoes = {
     }
 };
 
+async function atualizarStatusDoCard(solicit, statusElementId) {
+    const statusElement = document.getElementById(statusElementId);
+    if (!statusElement) return;
+
+    try {
+        const rows = await supabaseTableSelect('solicit', solicit);
+        const status = rows && rows.length
+            ? (rows[0].Status ?? rows[0].status ?? 'Sem status')
+            : 'Sem status';
+
+        statusElement.textContent = `Status: ${status}`;
+        statusElement.dataset.status = status;
+    } catch (error) {
+        console.error(`❌ Erro ao consultar status do Supabase para ${solicit}:`, error);
+        statusElement.textContent = 'Status: Erro';
+    }
+}
+
 // Função para buscar código do relatório no Supabase
 async function buscarCodigoRelatorio() {
     const refreshBtn = document.querySelector('.refresh-code-btn');
@@ -271,6 +289,7 @@ async function buscarCodigoRelatorio() {
 
         const codigo = rows && rows.length ? (rows[0].Code ?? rows[0].code ?? '000000') : '000000';
         codigoInput.value = codigo || '000000';
+        await atualizarStatusDoCard('QP_input', 'status-QP_input');
         criarNotificacao('Código do relatório atualizado com sucesso!', 'success');
     } catch (error) {
         console.error('❌ Erro ao buscar código do Supabase:', error);
@@ -298,6 +317,7 @@ async function buscarCodigoRelatorioInspecao() {
 
         const codigo = rows && rows.length ? (rows[0].Code ?? rows[0].code ?? '000000') : '000000';
         codigoInput.value = codigo || '000000';
+        await atualizarStatusDoCard('QP_Inspecao', 'status-QP_Inspecao');
         criarNotificacao('Código QP_Inspecao atualizado com sucesso!', 'success');
     } catch (error) {
         console.error('❌ Erro ao buscar código QP_Inspecao:', error);
@@ -308,6 +328,11 @@ async function buscarCodigoRelatorioInspecao() {
         refreshBtn.disabled = false;
     }
 }
+
+window.addEventListener('DOMContentLoaded', () => {
+    atualizarStatusDoCard('QP_input', 'status-QP_input');
+    atualizarStatusDoCard('QP_Inspecao', 'status-QP_Inspecao');
+});
 
 // Função para iniciar automação
 function iniciarAutomacao(tipo) {
