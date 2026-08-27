@@ -137,24 +137,19 @@ async function supabaseTableUpsertBySolicit(payload) {
     const codeValue = payload.Code ?? payload.code ?? '000000';
 
     for (const tableName of SUPABASE_TABLE_CANDIDATES) {
-        for (const candidateField of ['Solicit']) {
-            try {
-                const existingRows = await supabaseRequest(
-                    `/rest/v1/${tableName}?select=*&${candidateField}=eq.${encodeURIComponent(solicit)}&order=id.desc&limit=1`
-                );
+        try {
+            const existingRows = await supabaseRequest(
+                `/rest/v1/${tableName}?select=*&Solicit=eq.${encodeURIComponent(solicit)}&order=id.desc&limit=1`
+            );
 
-                if (!Array.isArray(existingRows) || existingRows.length === 0) {
-                    continue;
-                }
-
+            if (Array.isArray(existingRows) && existingRows.length > 0) {
                 const row = existingRows[0];
                 const rowId = row.id ?? row.Id;
-                const solicitField = Object.keys(row).find(key => key.toLowerCase() === 'solicit') || 'Solicit';
                 const statusField = Object.keys(row).find(key => key.toLowerCase() === 'status') || 'Status';
                 const codeField = Object.keys(row).find(key => key.toLowerCase() === 'code') || 'Code';
                 const patchPath = rowId != null
                     ? `/rest/v1/${tableName}?id=eq.${encodeURIComponent(String(rowId))}`
-                    : `/rest/v1/${tableName}?${solicitField}=eq.${encodeURIComponent(solicit)}`;
+                    : `/rest/v1/${tableName}?Solicit=eq.${encodeURIComponent(solicit)}`;
 
                 await supabaseRequest(patchPath, {
                     method: 'PATCH',
@@ -168,19 +163,33 @@ async function supabaseTableUpsertBySolicit(payload) {
                 });
 
                 return { tableName, action: 'update' };
-            } catch (error) {
-                const message = String(error.message || error);
-                const shouldContinue = message.includes('PGRST205')
-                    || message.includes('Could not find the table')
-                    || message.includes('42703')
-                    || message.includes('column')
-                    || message.includes('does not exist')
-                    || message.includes('Bad Request')
-                    || message.includes('Not Found');
+            }
 
-                if (!shouldContinue) {
-                    throw error;
-                }
+            const insertResult = await supabaseRequest(`/rest/v1/${tableName}`, {
+                method: 'POST',
+                headers: {
+                    Prefer: 'return=representation'
+                },
+                body: JSON.stringify({
+                    Status: statusValue,
+                    Solicit: solicit,
+                    Code: codeValue
+                })
+            });
+
+            return { tableName, action: 'insert', insertResult };
+        } catch (error) {
+            const message = String(error.message || error);
+            const shouldContinue = message.includes('PGRST205')
+                || message.includes('Could not find the table')
+                || message.includes('42703')
+                || message.includes('column')
+                || message.includes('does not exist')
+                || message.includes('Bad Request')
+                || message.includes('Not Found');
+
+            if (!shouldContinue) {
+                throw error;
             }
         }
     }
@@ -531,6 +540,7 @@ function resetarProgresso() {
     // Resetar variáveis globais
     automacaoAtual = null;
     automacaoAtualProcesso = null;
+    isProcessing = false;
 
     if (progressInterval) {
         clearInterval(progressInterval);
