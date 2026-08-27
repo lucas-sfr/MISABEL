@@ -7,11 +7,11 @@ let isProcessing = false;
 // URL do projeto do Supabase (Project Settings > API > Project URL)
 const SUPABASE_URL = 'https://ntmupvlfezywrqncifvm.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_YNWMOMvYtKaPMwmNxXlP5w_4SMftiXC';
-const SUPABASE_TABLE_CANDIDATES = ['Sessions', 'sessions'];
+const SUPABASE_TABLE_CANDIDATES = ['Sessions'];
 const SUPABASE_FIELD_CANDIDATES = {
-    solicit: ['Solicit', 'solicit'],
-    status: ['Status', 'status'],
-    code: ['Code', 'code']
+    solicit: ['Solicit'],
+    status: ['Status'],
+    code: ['Code']
 };
 
 async function supabaseRequest(path, options = {}) {
@@ -59,10 +59,22 @@ async function supabaseTableSelect(fieldName, fieldValue) {
         for (const candidateField of SUPABASE_FIELD_CANDIDATES[fieldName] || [fieldName]) {
             try {
                 const query = `?select=*&${candidateField}=eq.${encodeURIComponent(fieldValue)}&order=id.desc&limit=1`;
-                return await supabaseRequest(`/rest/v1/${tableName}${query}`);
+                const result = await supabaseRequest(`/rest/v1/${tableName}${query}`);
+                if (Array.isArray(result)) {
+                    return result;
+                }
+                return [];
             } catch (error) {
                 const message = String(error.message || error);
-                if (!message.includes('42703') && !message.includes('column') && !message.includes('does not exist')) {
+                const shouldContinue = message.includes('PGRST205')
+                    || message.includes('Could not find the table')
+                    || message.includes('42703')
+                    || message.includes('column')
+                    || message.includes('does not exist')
+                    || message.includes('Bad Request')
+                    || message.includes('Not Found');
+
+                if (!shouldContinue) {
                     throw error;
                 }
                 lastError = error;
@@ -70,7 +82,11 @@ async function supabaseTableSelect(fieldName, fieldValue) {
         }
     }
 
-    throw lastError || new Error('Não foi possível consultar o registro no Supabase.');
+    if (lastError) {
+        return [];
+    }
+
+    throw new Error('Não foi possível consultar o registro no Supabase.');
 }
 
 async function supabaseTableInsert(payload) {
@@ -82,11 +98,10 @@ async function supabaseTableInsert(payload) {
         }
 
         const payloadVariants = [
-            payload,
             {
-                status: payload.status ?? payload.Status,
-                solicit: payload.solicit ?? payload.Solicit,
-                code: payload.code ?? payload.Code
+                Status: payload.Status ?? payload.status,
+                Solicit: payload.Solicit ?? payload.solicit,
+                Code: payload.Code ?? payload.code
             }
         ].filter((value, index, self) => self.findIndex(item => JSON.stringify(item) === JSON.stringify(value)) === index);
 
@@ -122,7 +137,7 @@ async function supabaseTableUpsertBySolicit(payload) {
     const codeValue = payload.Code ?? payload.code ?? '000000';
 
     for (const tableName of SUPABASE_TABLE_CANDIDATES) {
-        for (const candidateField of ['Solicit', 'solicit']) {
+        for (const candidateField of ['Solicit']) {
             try {
                 const existingRows = await supabaseRequest(
                     `/rest/v1/${tableName}?select=*&${candidateField}=eq.${encodeURIComponent(solicit)}&order=id.desc&limit=1`
@@ -155,10 +170,17 @@ async function supabaseTableUpsertBySolicit(payload) {
                 return { tableName, action: 'update' };
             } catch (error) {
                 const message = String(error.message || error);
-                if (message.includes('PGRST205') || message.includes('Could not find the table') || message.includes('42703') || message.includes('column') || message.includes('does not exist')) {
-                    continue;
+                const shouldContinue = message.includes('PGRST205')
+                    || message.includes('Could not find the table')
+                    || message.includes('42703')
+                    || message.includes('column')
+                    || message.includes('does not exist')
+                    || message.includes('Bad Request')
+                    || message.includes('Not Found');
+
+                if (!shouldContinue) {
+                    throw error;
                 }
-                throw error;
             }
         }
     }
