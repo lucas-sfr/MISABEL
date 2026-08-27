@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:mso="urn:schemas-microsoft-com:office:office" xmlns:msdt="uuid:C2F41010-65B3-11d1-A29F-00AA00C14882">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central Operacional MIS - Automação Inteligente</title>
+    <link rel="icon" type="image/x-icon" href="Imgs/globo-logo-vermelho-hitss.ico">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+<!--[if gte mso 9]><xml>
+<mso:CustomDocumentProperties>
+<mso:_dlc_DocId msdt:dt="string">X2HJA3AFRPZK-1033733092-5958585</mso:_dlc_DocId>
+<mso:_dlc_DocIdItemGuid msdt:dt="string">549ade34-ac2e-4214-a231-31255810fa34</mso:_dlc_DocIdItemGuid>
+<mso:_dlc_DocIdUrl msdt:dt="string">https://hitssbr.sharepoint.com/sites/FileServerHitss/_layouts/15/DocIdRedir.aspx?ID=X2HJA3AFRPZK-1033733092-5958585, X2HJA3AFRPZK-1033733092-5958585</mso:_dlc_DocIdUrl>
+</mso:CustomDocumentProperties>
+</xml><![endif]-->
+</head>
+<body>
+    <!-- Background animado - Céu Estrelado -->
+    <div class="background">
+        <!-- Estrelas fixas no céu -->
+        <div class="star" style="top: 10%; left: 15%; animation-delay: 0s;"></div>
+        <div class="star" style="top: 20%; left: 25%; animation-delay: 1s;"></div>
+        <div class="star" style="top: 15%; left: 45%; animation-delay: 2s;"></div>
+        <div class="star" style="top: 25%; left: 65%; animation-delay: 3s;"></div>
+        <div class="star" style="top: 12%; left: 85%; animation-delay: 4s;"></div>
+        <div class="star" style="top: 30%; left: 10%; animation-delay: 5s;"></div>
+        <div class="star" style="top: 18%; left: 35%; animation-delay: 6s;"></div>
+        <div class="star" style="top: 22%; left: 55%; animation-delay: 7s;"></div>
+        <div class="star" style="top: 8%; left: 75%; animation-delay: 8s;"></div>
+        <div class="star" style="top: 35%; left: 20%; animation-delay: 9s;"></div>
+        <div class="star" style="top: 28%; left: 40%; animation-delay: 10s;"></div>
+        <div class="star" style="top: 5%; left: 60%; animation-delay: 11s;"></div>
+        <div class="star" style="top: 32%; left: 80%; animation-delay: 12s;"></div>
+        <div class="star" style="top: 15%; left: 5%; animation-delay: 13s;"></div>
+        <div class="star" style="top: 40%; left: 50%; animation-delay: 14s;"></div>
+
+        <!-- Estrelas cadentes caindo -->
+        <div class="falling-star" style="left: 15%; animation-delay: 2.3s;"></div>
+        <div class="falling-star" style="left: 35%; animation-delay: 4.7s;"></div>
+        <div class="falling-star" style="left: 55%; animation-delay: 7.1s;"></div>
+        <div class="falling-star" style="left: 75%; animation-delay: 9.8s;"></div>
+        <div class="falling-star" style="left: 25%; animation-delay: 11.6s;"></div>
+        <div class="falling-star" style="left: 65%; animation-delay: 14.2s;"></div>
+        <div class="falling-star" style="left: 85%; animation-delay: 16.9s;"></div>
+        <div class="falling-star" style="left: 5%; animation-delay: 19.3s;"></div>
+        <div class="falling-star" style="left: 45%; animation-delay: 1.8s;"></div>
+        <div class="falling-star" style="left: 70%; animation-delay: 6.4s;"></div>
+        <div class="falling-star" style="left: 20%; animation-delay: 8.9s;"></div>
+        <div class="falling-star" style="left: 90%; animation-delay: 12.1s;"></div>
+        <div class="falling-star" style="left: 40%; animation-delay: 15.7s;"></div>
+        <div class="falling-star" style="left: 60%; animation-delay: 18.4s;"></div>
+        <div class="falling-star" style="left: 10%; animation-delay: 21.2s;"></div>
+        <div class="falling-star" style="left: 50%; animation-delay: 23.8s;"></div>
+        <div class="falling-star" style="left: 30%; animation-delay: 0.9s;"></div>
+        <div class="falling-star" style="left: 80%; animation-delay: 3.6s;"></div>
+        <div class="falling-star" style="left: 12%; animation-delay: 5.8s;"></div>
+        <div class="falling-star" style="left: 68%; animation-delay: 8.2s;"></div>
+        <div class="falling-star" style="left: 22%; animation-delay: 10.4s;"></div>
+        <div class="falling-star" style="left: 78%; animation-delay: 13.1s;"></div>
+        <div class="falling-star" style="left: 38%; animation-delay: 15.9s;"></div>
+        <div class="falling-star" style="left: 62%; animation-delay: 17.6s;"></div>
+        <div class="falling-star" style="left: 8%; animation-delay: 20.3s;"></div>
+        <div class="falling-star" style="left: 48%; animation-delay: 22.7s;"></div>
+        <div class="falling-star" style="left: 28%; animation-delay: 25.1s;"></div>
+        <div class="falling-star" style="left: 72%; animation-delay: 27.4s;"></div>
+
+        <!-- Via Láctea (faixa de estrelas) -->
+        <div class="milky-way"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <!-- Logo à esquerda -->
+        <div class="hero-logo-left">
+            <img src="Imgs/Logo.png" alt="Logo Central Operacional MIS" class="logo-image">
+        </div>
+
+        <!-- Status à direita -->
+        <div class="hero-status-right">
+            <span class="status-dot"></span>
+            Sistema Online
+        </div>
+
+        <div class="hero-stars">
+            <!-- Hero stars -->
+            <div class="star" style="top: 15%; left: 20%; animation-delay: 0s;"></div>
+            <div class="star" style="top: 25%; left: 40%; animation-delay: 1s;"></div>
+            <div class="star" style="top: 20%; left: 60%; animation-delay: 2s;"></div>
+            <div class="star" style="top: 30%; left: 80%; animation-delay: 3s;"></div>
+            <div class="star" style="top: 10%; left: 30%; animation-delay: 4s;"></div>
+            <div class="star" style="top: 35%; left: 50%; animation-delay: 5s;"></div>
+            <div class="star" style="top: 18%; left: 70%; animation-delay: 6s;"></div>
+            <div class="star" style="top: 28%; left: 15%; animation-delay: 7s;"></div>
+            <div class="star" style="top: 12%; left: 45%; animation-delay: 8s;"></div>
+            <div class="star" style="top: 22%; left: 75%; animation-delay: 9s;"></div>
+
+            <!-- Hero falling stars -->
+            <div class="falling-star" style="left: 25%; animation-delay: 2s;"></div>
+            <div class="falling-star" style="left: 55%; animation-delay: 5s;"></div>
+            <div class="falling-star" style="left: 35%; animation-delay: 8s;"></div>
+            <div class="falling-star" style="left: 75%; animation-delay: 11s;"></div>
+            <div class="falling-star" style="left: 15%; animation-delay: 14s;"></div>
+        </div>
+
+        <div class="hero-content">
+            <h1 class="mis-title">MIS</h1>
+            <h2 class="gestao-title">GESTÃO DE INFORMAÇÃO</h2>
+            <h3 class="gerenciador-title">GERENCIADOR DE AUTOMAÇÕES</h3>
+        </div>
+
+        <div class="scroll-indicator">
+            <div class="scroll-mouse">
+                <div class="scroll-wheel"></div>
+            </div>
+            <p>Role para baixo</p>
+        </div>
+    </section>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+        </div>
+        <div class="header-wave"></div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="welcome-section">
+        <h2 class="welcome-title">Bem-vindo ao Centro de Controle</h2>
+        <p class="welcome-subtitle">Automações inteligentes para otimizar suas operações</p>
+    </div>
+
+    <div class="automations-grid">
+            <!-- Relatórios Automatizados -->
+            <div class="automation-card" data-automation="relatorios">
+                <div class="card-background">
+                    <div class="card-glow"></div>
+                </div>
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="card-title">Relatório - Qualidade de Pedidos do Input</h3>
+                    <p class="card-description">Relatório disponibilizado na Rede: Niteroi</p>
+                    <div class="card-stats">
+                        <span class="stat">Inspeção</span>
+                        <span class="stat">D-1</span>
+                    </div>
+                    <div class="code-container">
+                        <label class="code-label">Código do Relatório:</label>
+                        <div class="code-input-wrapper">
+                            <input type="text" 
+                                   id="relatorio-codigo" 
+                                   class="code-input" 
+                                   maxlength="7" 
+                                   placeholder="000000" 
+                                   readonly>
+                            <button class="refresh-code-btn" onclick="buscarCodigoRelatorio()" title="Buscar código">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="start-btn" onclick="iniciarAutomacao('relatorios')">
+                        <span class="btn-text">Iniciar Automação</span>
+                        <i class="fas fa-play btn-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard de Performance -->
+            <div class="automation-card" data-automation="dashboard">
+                <div class="card-background">
+                    <div class="card-glow"></div>
+                </div>
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h3 class="card-title">Relatório - Qualidade de Pedidos da Inspeção</h3>
+                    <p class="card-description">Relatório disponibilizado na Rede: Niteroi</p>
+                    <div class="card-stats">
+                        <span class="stat">15+ métricas</span>
+                        <span class="stat">Tempo real</span>
+                    </div>
+                    <div class="code-container">
+                        <label class="code-label">Código do Relatório:</label>
+                        <div class="code-input-wrapper">
+                            <input type="text" 
+                                   id="relatorio-codigo-inspecao" 
+                                   class="code-input" 
+                                   maxlength="7" 
+                                   placeholder="000000" 
+                                   readonly>
+                            <button class="refresh-code-btn" onclick="buscarCodigoRelatorioInspecao()" title="Buscar código">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="start-btn" onclick="iniciarAutomacaoInspecao('dashboard')">
+                        <span class="btn-text">Iniciar Automação</span>
+                        <i class="fas fa-play btn-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Análise de Dados -->
+            <div class="automation-card" data-automation="analise">
+                <div class="card-background">
+                    <div class="card-glow"></div>
+                </div>
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3 class="card-title">Análise de Dados Inteligente</h3>
+                    <p class="card-description">IA avançada para análise preditiva e insights estratégicos.</p>
+                    <div class="card-stats">
+                        <span class="stat">ML powered</span>
+                        <span class="stat">98% acurácia</span>
+                    </div>
+                    <button class="start-btn" onclick="iniciarAutomacao('analise')">
+                        <span class="btn-text">Iniciar Análise</span>
+                        <i class="fas fa-play btn-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Consolidar - Qualidade de pedidos da Inspeção -->
+            <div class="automation-card" data-automation="consolidado">
+                <div class="card-background">
+                    <div class="card-glow"></div>
+                </div>
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <h3 class="card-title">Consolidar - Qualidade de pedidos da Inspeção</h3>
+                    <p class="card-description">Consolidação de dados de qualidade de pedidos para análise completa.</p>
+                    <div class="card-stats">
+                        <span class="stat">Data processing</span>
+                        <span class="stat">Full analysis</span>
+                    </div>
+                    <button class="start-btn" onclick="iniciarAutomacaoConsolidado('consolidado')">
+                        <span class="btn-text">Iniciar Automação</span>
+                        <i class="fas fa-play btn-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Controle de Qualidade -->
+            <div class="automation-card" data-automation="qualidade">
+                <div class="card-background">
+                    <div class="card-glow"></div>
+                </div>
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="card-title">Controle de Qualidade</h3>
+                    <p class="card-description">Sistema automatizado de verificação e garantia da qualidade dos processos.</p>
+                    <div class="card-stats">
+                        <span class="stat">Zero defeitos</span>
+                        <span class="stat">Auto-correção</span>
+                    </div>
+                    <button class="start-btn" onclick="iniciarAutomacao('qualidade')">
+                        <span class="btn-text">Iniciar Controle</span>
+                        <i class="fas fa-play btn-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Gestão de Inventário -->
+            <div class="automation-card" data-automation="inventario">
+                <div class="card-background">
+                    <div class="card-glow"></div>
+                </div>
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+                    <h3 class="card-title">Gestão de Inventário</h3>
+                    <p class="card-description">Controle inteligente de estoque com reposição automática e alertas.</p>
+                    <div class="card-stats">
+                        <span class="stat">100% precisão</span>
+                        <span class="stat">Auto-restock</span>
+                    </div>
+                    <button class="start-btn" onclick="iniciarAutomacao('inventario')">
+                        <span class="btn-text">Iniciar Gestão</span>
+                        <i class="fas fa-play btn-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Monitoramento em Tempo Real -->
+            <div class="automation-card" data-automation="monitoramento">
+                <div class="card-background">
+                    <div class="card-glow"></div>
+                </div>
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h3 class="card-title">Monitoramento em Tempo Real</h3>
+                    <p class="card-description">Vigilância contínua de todos os sistemas e processos operacionais.</p>
+                    <div class="card-stats">
+                        <span class="stat">24/7 vigilância</span>
+                        <span class="stat">Instantâneo</span>
+                    </div>
+                    <button class="start-btn" onclick="iniciarAutomacao('monitoramento')">
+                        <span class="btn-text">Iniciar Monitoramento</span>
+                        <i class="fas fa-play btn-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Alertas Inteligentes -->
+            <div class="automation-card" data-automation="alertas">
+                <div class="card-background">
+                    <div class="card-glow"></div>
+                </div>
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3 class="card-title">Alertas Inteligentes</h3>
+                    <p class="card-description">Sistema de notificações proativo com inteligência artificial.</p>
+                    <div class="card-stats">
+                        <span class="stat">IA powered</span>
+                        <span class="stat">Instantâneo</span>
+                    </div>
+                    <button class="start-btn" onclick="iniciarAutomacao('alertas')">
+                        <span class="btn-text">Iniciar Alertas</span>
+                        <i class="fas fa-play btn-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Otimização de Processos -->
+            <div class="automation-card" data-automation="otimizacao">
+                <div class="card-background">
+                    <div class="card-glow"></div>
+                </div>
+                <div class="card-content">
+                    <div class="card-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3 class="card-title">Otimização de Processos</h3>
+                    <p class="card-description">Melhoria contínua e automatizada da eficiência operacional.</p>
+                    <div class="card-stats">
+                        <span class="stat">+40% eficiência</span>
+                        <span class="stat">Auto-ajuste</span>
+                    </div>
+                    <button class="start-btn" onclick="iniciarAutomacao('otimizacao')">
+                        <span class="btn-text">Iniciar Otimização</span>
+                        <i class="fas fa-play btn-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="confirmation-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Confirmar Inicialização</h3>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="modal-message">Tem certeza que deseja iniciar esta automação?</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <p class="progress-text" id="progress-text">Preparando inicialização...</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+                <button class="btn-confirm" id="btn-confirm" onclick="confirmarInicializacao()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
