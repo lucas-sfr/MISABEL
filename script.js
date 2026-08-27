@@ -416,6 +416,7 @@ async function confirmarInicializacao() {
 
         if (!resultado) {
             criarNotificacao(`Nenhum registro existente para ${solicit}. Edição cancelada.`, 'error');
+            fecharModal();
             return;
         }
 
@@ -423,6 +424,8 @@ async function confirmarInicializacao() {
     } catch (error) {
         console.error('❌ Erro ao gravar no Supabase:', error);
         criarNotificacao('Erro ao gravar no Supabase: ' + error.message, 'error');
+        fecharModal();
+        return;
     }
 
     let progress = 0;
@@ -458,6 +461,15 @@ async function confirmarInicializacao() {
 
         progressText.textContent = mensagens[mensagemIndex];
     }, totalTime / 100);
+
+    // Garante que o estado seja liberado depois da execução bem-sucedida/erro/reset do modal.
+    setTimeout(() => {
+        if (!progressInterval) {
+            isProcessing = false;
+            btnConfirm.disabled = false;
+            btnConfirm.textContent = 'Confirmar';
+        }
+    }, 50);
 }
 
 // Função para finalizar automação
