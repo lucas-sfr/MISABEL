@@ -134,11 +134,12 @@ async function supabaseTableUpsertBySolicit(payload) {
 
                 const row = existingRows[0];
                 const rowId = row.id ?? row.Id;
+                const solicitField = Object.keys(row).find(key => key.toLowerCase() === 'solicit') || 'Solicit';
                 const statusField = Object.keys(row).find(key => key.toLowerCase() === 'status') || 'Status';
                 const codeField = Object.keys(row).find(key => key.toLowerCase() === 'code') || 'Code';
                 const patchPath = rowId != null
                     ? `/rest/v1/${tableName}?id=eq.${encodeURIComponent(String(rowId))}`
-                    : `/rest/v1/${tableName}?${candidateField}=eq.${encodeURIComponent(solicit)}`;
+                    : `/rest/v1/${tableName}?${solicitField}=eq.${encodeURIComponent(solicit)}`;
 
                 await supabaseRequest(patchPath, {
                     method: 'PATCH',
@@ -392,10 +393,11 @@ async function confirmarInicializacao() {
         });
 
         if (!resultado) {
-            throw new Error(`Nenhum registro existente encontrado para ${solicit}. A edição foi ignorada.`);
+            criarNotificacao(`Nenhum registro existente para ${solicit}. Edição cancelada.`, 'error');
+            return;
         }
 
-        criarNotificacao('Automação atualizada no Supabase com sucesso!', 'success');
+        criarNotificacao('Registro existente atualizado no Supabase com sucesso!', 'success');
     } catch (error) {
         console.error('❌ Erro ao gravar no Supabase:', error);
         criarNotificacao('Erro ao gravar no Supabase: ' + error.message, 'error');
