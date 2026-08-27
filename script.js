@@ -4,6 +4,29 @@ let automacaoAtualProcesso = null; // Nova variável para controlar o processo
 let progressInterval = null;
 let isProcessing = false;
 
+const SUPABASE_URL = 'https://ynwmomvytkapmwmnxxlp5w4smftixc.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_YNWMOMvYtKaPMwmNxXlP5w_4SMftiXC';
+
+async function supabaseRequest(path, options = {}) {
+    const response = await fetch(`${SUPABASE_URL}${path}`, {
+        ...options,
+        headers: {
+            apikey: SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            ...(options.headers || {})
+        }
+    });
+
+    if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Supabase error ${response.status}: ${text}`);
+    }
+
+    if (response.status === 204) return null;
+    return response.json();
+}
+
 // Dados das automações
 const automacoes = {
     relatorios: {
@@ -62,149 +85,59 @@ const automacoes = {
     }
 };
 
-// Função para buscar código do relatório da API
+// Função para buscar código do relatório no Supabase
 async function buscarCodigoRelatorio() {
     const refreshBtn = document.querySelector('.refresh-code-btn');
     const codigoInput = document.getElementById('relatorio-codigo');
     
     if (!refreshBtn || !codigoInput) return;
     
-    // Adicionar estado de loading
     refreshBtn.classList.add('loading');
     refreshBtn.disabled = true;
     codigoInput.value = '';
     
     try {
-        console.log('🔍 Buscando código da API logs_hoje...');
-        
-        const response = await fetch('https://elpis.globalhitss.com.br/api/logs_hoje', {
-            method: 'GET',
-            headers: {
-                'Authorization': 'Lenovo!Hitss!Global',
-                'Content-Type': 'application/json'
-            }
-        });
+        const rows = await supabaseRequest(
+            '/rest/v1/sessions?select=*&solicit=eq.QP_input&order=id.desc&limit=1'
+        );
 
-        if (!response.ok) {
-            throw new Error(`Erro na API: ${response.status}`);
-        }
-
-        const logs = await response.json();
-        console.log('📋 Logs recebidos:', logs);
-
-        // Filtrar pelo maior ID com processo QP_input e status Iniciado
-        let logSelecionado = null;
-        let maiorId = -1;
-
-        if (Array.isArray(logs)) {
-            logs.forEach(log => {
-                // Tenta encontrar com os diferentes nomes de campo possíveis
-                const processo = log.processo || log.nome_processo;
-                if (processo === 'QP_input' && 
-                    log.status === 'Iniciado' && 
-                    log.id > maiorId) {
-                    maiorId = log.id;
-                    logSelecionado = log;
-                }
-            });
-        }
-
-        if (logSelecionado) {
-            // Extrair código do campo observacao
-            const codigo = logSelecionado.observacao || '';
-            const codigoFormatado = codigo;
-            
-            codigoInput.value = codigoFormatado;
-            console.log('✅ Código encontrado:', codigoFormatado);
-            console.log('📋 Log selecionado:', logSelecionado);
-            
-            criarNotificacao('Código do relatório atualizado com sucesso!', 'success');
-        } else {
-            console.log('⚠️ Nenhum log encontrado com os critérios');
-            codigoInput.value = '000000';
-            criarNotificacao('Nenhum código disponível no momento', 'error');
-        }
-
+        const codigo = rows && rows.length ? rows[0].code : '000000';
+        codigoInput.value = codigo || '000000';
+        criarNotificacao('Código do relatório atualizado com sucesso!', 'success');
     } catch (error) {
-        console.error('❌ Erro ao buscar código:', error);
+        console.error('❌ Erro ao buscar código do Supabase:', error);
         codigoInput.value = '000000';
         criarNotificacao('Erro ao buscar código: ' + error.message, 'error');
     } finally {
-        // Remover estado de loading
         refreshBtn.classList.remove('loading');
         refreshBtn.disabled = false;
     }
 }
 
-// Função para buscar código do relatório da API para QP_Inspecao
+// Função para buscar código do relatório da Inspeção no Supabase
 async function buscarCodigoRelatorioInspecao() {
     const refreshBtn = document.querySelector('#relatorio-codigo-inspecao').nextElementSibling;
     const codigoInput = document.getElementById('relatorio-codigo-inspecao');
     
     if (!refreshBtn || !codigoInput) return;
     
-    // Adicionar estado de loading
     refreshBtn.classList.add('loading');
     refreshBtn.disabled = true;
     codigoInput.value = '';
     
     try {
-        console.log('🔍 Buscando código da API logs_hoje para QP_Inspecao...');
-        
-        const response = await fetch('https://elpis.globalhitss.com.br/api/logs_hoje', {
-            method: 'GET',
-            headers: {
-                'Authorization': 'Lenovo!Hitss!Global',
-                'Content-Type': 'application/json'
-            }
-        });
+        const rows = await supabaseRequest(
+            '/rest/v1/sessions?select=*&solicit=eq.QP_Inspecao&order=id.desc&limit=1'
+        );
 
-        if (!response.ok) {
-            throw new Error(`Erro na API: ${response.status}`);
-        }
-
-        const logs = await response.json();
-        console.log('📋 Logs recebidos:', logs);
-
-        // Filtrar pelo maior ID com processo QP_Inspecao e status Iniciado
-        let logSelecionado = null;
-        let maiorId = -1;
-
-        if (Array.isArray(logs)) {
-            logs.forEach(log => {
-                // Tenta encontrar com os diferentes nomes de campo possíveis
-                const processo = log.processo || log.nome_processo;
-                if (processo === 'QP_Inspecao' && 
-                    log.status === 'Iniciado' && 
-                    log.id > maiorId) {
-                    maiorId = log.id;
-                    logSelecionado = log;
-                }
-            });
-        }
-
-        if (logSelecionado) {
-            // Extrair código do campo observacao
-            const codigo = logSelecionado.observacao || '';
-            const codigoFormatado = codigo;
-            
-            codigoInput.value = codigoFormatado;
-            console.log('✅ Código QP_Inspecao encontrado:', codigoFormatado);
-            console.log('📋 Log selecionado:', logSelecionado);
-            
-            criarNotificacao('Código QP_Inspecao atualizado com sucesso!', 'success');
-        } else {
-            console.log('⚠️ Nenhum log QP_Inspecao encontrado com os critérios');
-            codigoInput.value = '000000';
-            criarNotificacao('Nenhum código QP_Inspecao disponível no momento', 'error');
-        }
-
+        const codigo = rows && rows.length ? rows[0].code : '000000';
+        codigoInput.value = codigo || '000000';
+        criarNotificacao('Código QP_Inspecao atualizado com sucesso!', 'success');
     } catch (error) {
         console.error('❌ Erro ao buscar código QP_Inspecao:', error);
         codigoInput.value = '000000';
         criarNotificacao('Erro ao buscar código QP_Inspecao: ' + error.message, 'error');
     } finally {
-        // Remover estado de loading
         refreshBtn.classList.remove('loading');
         refreshBtn.disabled = false;
     }
@@ -294,7 +227,7 @@ function fecharModal() {
     }, 300);
 }
 
-// Função para confirmar inicialização
+// Função para confirmar inicialização no Supabase
 async function confirmarInicializacao() {
     if (!automacaoAtual || isProcessing) return;
 
@@ -306,76 +239,41 @@ async function confirmarInicializacao() {
     btnConfirm.disabled = true;
     btnConfirm.textContent = 'Processando...';
 
-    // Verificar se é a automação de relatorios, QP_Inspecao ou QP_Consolidado e fazer requisição para API
-    if (automacaoAtual === 'relatorios' || automacaoAtualProcesso === 'QP_Inspecao' || automacaoAtualProcesso === 'QP_Consolidado') {
-        // Obter código do campo de input correto (QP_Consolidado não tem código)
-        let codigoRelatorio = '000000';
-        if (automacaoAtualProcesso === 'QP_Inspecao') {
-            const codigoInput = document.getElementById('relatorio-codigo-inspecao');
-            codigoRelatorio = codigoInput ? codigoInput.value : '000000';
-        } else if (automacaoAtual === 'relatorios') {
-            const codigoInput = document.getElementById('relatorio-codigo');
-            codigoRelatorio = codigoInput ? codigoInput.value : '000000';
-        }
-        
-        // URL formatada como Raw String e com .strip() como no Python
-        const url = "https://elpis.globalhitss.com.br/api/log".trim();
-        
-        // Payload exato como no Python, usando o código do relatório
-        const payload = {
-            "usuario": "MIS_Auomat",  // usuario (campo que a API espera)
-            "maquina": "Site_Mis",  // máquina específica
-            "tipo_processo": "RPA",  // tipo_processo="RPA"
-            "processo": automacaoAtualProcesso || "QP_input",  // Usa QP_Inspecao, QP_Consolidado ou QP_input
-            "status": "Solicitado",  // status="Solicitado" (campo que a API espera)
-            "observacao": codigoRelatorio  // observacao com o código (QP_Consolidado usa '000000')
-        };
-
-        console.log('🔍 Iniciando requisição para API...');
-        console.log('📋 Código do relatório:', codigoRelatorio);
-        console.log('📋 URL da requisição:', url);
-        console.log('📋 Headers:', {
-            'Content-Type': 'application/json',
-            'Authorization': 'Lenovo!Hitss!Global'
-        });
-        console.log('📋 Payload a ser enviado:', JSON.stringify(payload, null, 2));
-        console.log('📋 Payload formatado:', payload);
-
-        // Enviar requisição POST como no exemplo
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Lenovo!Hitss!Global'
-                },
-                body: JSON.stringify(payload)
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                console.log('✅ Sucesso:', result);
-                const mensagemSucesso = automacaoAtualProcesso === 'QP_Inspecao' 
-                    ? 'Relatório QP_Inspecao solicitado com sucesso!' 
-                    : 'Relatório de Qualidade de Pedidos solicitado com sucesso!';
-                criarNotificacao(mensagemSucesso, 'success');
-            } else {
-                console.log('❌ Erro:', result);
-                criarNotificacao('Erro ao enviar requisição', 'error');
-            }
-        } catch (error) {
-            console.error('❌ Erro de conexão:', error);
-            criarNotificacao('Erro de conexão: ' + error.message, 'error');
-        }
+    let codigoRelatorio = '000000';
+    if (automacaoAtual === 'relatorios') {
+        codigoRelatorio = document.getElementById('relatorio-codigo')?.value || '000000';
+    } else if (automacaoAtualProcesso === 'QP_Inspecao') {
+        codigoRelatorio = document.getElementById('relatorio-codigo-inspecao')?.value || '000000';
     }
 
-    // Animação de progresso
+    const solicit = automacaoAtualProcesso === 'QP_Inspecao'
+        ? 'QP_Inspecao'
+        : 'QP_input';
+
+    try {
+        await supabaseRequest('/rest/v1/sessions', {
+            method: 'POST',
+            headers: {
+                Prefer: 'return=representation'
+            },
+            body: JSON.stringify({
+                status: 'Solicitado',
+                solicit,
+                code: codigoRelatorio
+            })
+        });
+
+        criarNotificacao('Automação registrada no Supabase com sucesso!', 'success');
+    } catch (error) {
+        console.error('❌ Erro ao gravar no Supabase:', error);
+        criarNotificacao('Erro ao gravar no Supabase: ' + error.message, 'error');
+    }
+
     let progress = 0;
     const totalTime = automacoes[automacaoAtual].tempoEstimado;
 
     progressInterval = setInterval(() => {
-        progress += Math.random() * 15 + 5; // Progresso variável
+        progress += Math.random() * 15 + 5;
         if (progress >= 100) {
             progress = 100;
             finalizarAutomacao();
@@ -383,41 +281,26 @@ async function confirmarInicializacao() {
 
         progressFill.style.width = progress + '%';
 
-        // Mensagens dinâmicas de progresso
         const mensagens = automacaoAtualProcesso === 'QP_Inspecao' ? [
             'Enviando solicitação QP_Inspecao...',
-            'Conectando ao servidor...',
-            'Processando requisição de inspeção...',
-            'Registrando QP_Inspecao no sistema...',
-            'Confirmando solicitação de inspeção...',
-            'Solicitação QP_Inspecao registrada!'
-        ] : automacaoAtualProcesso === 'QP_Consolidado' ? [
-            'Enviando solicitação QP_Consolidado...',
-            'Conectando ao servidor...',
-            'Processando requisição de consolidação...',
-            'Registrando QP_Consolidado no sistema...',
-            'Confirmando solicitação de consolidação...',
-            'Solicitação QP_Consolidado registrada!'
-        ] : automacaoAtual === 'relatorios' ? [
-            'Enviando solicitação...',
-            'Conectando ao servidor...',
-            'Processando requisição...',
-            'Registrando no sistema...',
-            'Confirmando solicitação...',
-            'Solicitação registrada!'
+            'Registrando status...',
+            'Atualizando solicitação...',
+            'Validando código...',
+            'Finalizando operação...'
         ] : [
-            'Inicializando sistemas...',
-            'Carregando configurações...',
-            'Conectando aos serviços...',
-            'Processando dados...',
-            'Otimizando algoritmos...',
-            'Finalizando configuração...',
-            'Automação ativa!'
+            'Enviando solicitação...',
+            'Registrando status...',
+            'Atualizando solicitação...',
+            'Validando código...',
+            'Finalizando operação...'
         ];
 
-        const mensagemIndex = Math.floor((progress / 100) * mensagens.length);
-        progressText.textContent = mensagens[Math.min(mensagemIndex, mensagens.length - 1)];
+        const mensagemIndex = Math.min(
+            Math.floor((progress / 100) * mensagens.length),
+            mensagens.length - 1
+        );
 
+        progressText.textContent = mensagens[mensagemIndex];
     }, totalTime / 100);
 }
 
