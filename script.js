@@ -7,6 +7,7 @@ let isProcessing = false;
 // URL do projeto do Supabase (Project Settings > API > Project URL)
 const SUPABASE_URL = 'https://ntmupvlfezywrqncifvm.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_YNWMOMvYtKaPMwmNxXlP5w_4SMftiXC';
+const SUPABASE_TABLE_CANDIDATES = ['Sessions', 'sessions'];
 
 async function supabaseRequest(path, options = {}) {
     const response = await fetch(`${SUPABASE_URL}${path}`, {
@@ -26,6 +27,24 @@ async function supabaseRequest(path, options = {}) {
 
     if (response.status === 204) return null;
     return response.json();
+}
+
+async function supabaseTableRequest(query = '', options = {}) {
+    let lastError = null;
+
+    for (const tableName of SUPABASE_TABLE_CANDIDATES) {
+        try {
+            return await supabaseRequest(`/rest/v1/${tableName}${query}`, options);
+        } catch (error) {
+            const message = String(error.message || error);
+            if (!message.includes('PGRST205') && !message.includes('Could not find the table')) {
+                throw error;
+            }
+            lastError = error;
+        }
+    }
+
+    throw lastError || new Error('Não foi possível acessar a tabela do Supabase.');
 }
 
 // Dados das automações
@@ -98,8 +117,8 @@ async function buscarCodigoRelatorio() {
     codigoInput.value = '';
     
     try {
-        const rows = await supabaseRequest(
-            '/rest/v1/sessions?select=*&solicit=eq.QP_input&order=id.desc&limit=1'
+        const rows = await supabaseTableRequest(
+            '?select=*&solicit=eq.QP_input&order=id.desc&limit=1'
         );
 
         const codigo = rows && rows.length ? rows[0].code : '000000';
@@ -127,8 +146,8 @@ async function buscarCodigoRelatorioInspecao() {
     codigoInput.value = '';
     
     try {
-        const rows = await supabaseRequest(
-            '/rest/v1/sessions?select=*&solicit=eq.QP_Inspecao&order=id.desc&limit=1'
+        const rows = await supabaseTableRequest(
+            '?select=*&solicit=eq.QP_Inspecao&order=id.desc&limit=1'
         );
 
         const codigo = rows && rows.length ? rows[0].code : '000000';
@@ -252,7 +271,7 @@ async function confirmarInicializacao() {
         : 'QP_input';
 
     try {
-        await supabaseRequest('/rest/v1/sessions', {
+        await supabaseTableRequest('', {
             method: 'POST',
             headers: {
                 Prefer: 'return=representation'
